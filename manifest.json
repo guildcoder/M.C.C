@@ -1,0 +1,20 @@
+{
+  "name": "McNabb Cotton Club",
+  "short_name": "McNabb CC",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#174d16",
+  "theme_color": "#1f5d1b",
+  "icons": [
+    {
+      "src": "assets/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="McNabb CC" />
+  <meta name="theme-color" content="#1f5d1b" />
+  <title>McNabb Cotton Club</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="assets/icon-192.png" />
+  <style>
+    :root{
+      --bg:#174d16;
+      --panel:#235f22;
+      --panel-2:#2d6b2c;
+      --card:#f3f3ef;
+      --line:rgba(255,255,255,.18);
+      --text:#f6f6f1;
+      --dark:#1a1a1a;
+      --muted:rgba(255,255,255,.72);
+      --accent:#e9c46a;
+      --shadow:0 10px 30px rgba(0,0,0,.22);
+      --safe-top: max(env(safe-area-inset-top), 14px);
+      --safe-bottom: max(env(safe-area-inset-bottom), 18px);
+    }
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;
+      background:linear-gradient(180deg,#1f5d1b 0%, #123710 100%);
+      color:var(--text);
+    }
+    .app{
+      min-height:100%;
+      padding:var(--safe-top) 14px calc(90px + var(--safe-bottom));
+      max-width:720px;
+      margin:0 auto;
+    }
+    .hero{
+      position:relative;
+      border-radius:28px;
+      overflow:hidden;
+      box-shadow:var(--shadow);
+      background:#0f2c0d;
+      min-height:270px;
+      display:flex;
+      align-items:flex-end;
+    }
+    .hero img{width:100%; display:block}
+    .hero-overlay{
+      position:absolute; inset:0;
+      background:linear-gradient(180deg,rgba(0,0,0,.02) 30%, rgba(0,0,0,.55) 100%);
+      display:flex; flex-direction:column; justify-content:flex-end;
+      padding:18px;
+    }
+    h1,h2,h3,p{margin:0}
+    .sub{margin-top:6px;color:var(--muted);font-size:.95rem}
+    .grid{display:grid; gap:14px; margin-top:16px}
+    .card{
+      background:rgba(255,255,255,.08);
+      border:1px solid var(--line);
+      border-radius:22px;
+      padding:14px;
+      backdrop-filter: blur(12px);
+      box-shadow:var(--shadow);
+    }
+    .players-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+      margin-top:12px;
+    }
+    @media (max-width:540px){ .players-grid{grid-template-columns:1fr;} }
+    label{
+      display:block;
+      font-size:.88rem;
+      color:var(--muted);
+      margin-bottom:6px;
+    }
+    input, select, button, textarea{
+      font:inherit;
+    }
+    input[type="text"], input[type="number"]{
+      width:100%;
+      border:none;
+      border-radius:16px;
+      padding:14px 14px;
+      background:rgba(255,255,255,.95);
+      color:#111;
+      min-height:48px;
+    }
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button{
+      -webkit-appearance:none; margin:0;
+    }
+    .button-row{
+      display:flex; gap:10px; flex-wrap:wrap; margin-top:14px;
+    }
+    button{
+      border:none;
+      border-radius:16px;
+      min-height:48px;
+      padding:0 16px;
+      font-weight:700;
+      cursor:pointer;
+    }
+    .primary{background:var(--accent); color:#1d1d1d}
+    .secondary{background:rgba(255,255,255,.12); color:var(--text); border:1px solid var(--line)}
+    .ghost{background:transparent; color:var(--text); border:1px solid var(--line)}
+    .segmented{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:8px;
+      margin-top:12px;
+    }
+    .segmented button.active{background:var(--accent); color:#1d1d1d}
+    .screen{display:none}
+    .screen.active{display:block}
+    .hole-card{
+      overflow:hidden;
+      padding:0;
+    }
+    .hole-top{
+      position:relative;
+      background:#0b2509;
+    }
+    .hole-top img{
+      width:100%;
+      display:block;
+    }
+    .hole-meta{
+      position:absolute;
+      left:14px; right:14px; bottom:14px;
+      display:flex; justify-content:space-between; gap:10px; align-items:end;
+      text-shadow:0 2px 10px rgba(0,0,0,.8);
+    }
+    .pill{
+      display:inline-block;
+      background:rgba(0,0,0,.42);
+      border:1px solid rgba(255,255,255,.16);
+      border-radius:999px;
+      padding:7px 12px;
+      font-size:.84rem;
+    }
+    .hole-body{padding:14px}
+    .score-row{
+      display:grid; grid-template-columns:1fr 92px; gap:10px; align-items:center;
+      margin-bottom:10px;
+    }
+    .player-chip{
+      background:rgba(255,255,255,.1);
+      border:1px solid var(--line);
+      border-radius:16px;
+      min-height:48px;
+      display:flex;
+      align-items:center;
+      padding:0 14px;
+      font-weight:600;
+    }
+    .totals-table{
+      width:100%;
+      border-collapse:collapse;
+      overflow:hidden;
+      border-radius:18px;
+      background:rgba(255,255,255,.96);
+      color:#111;
+      margin-top:10px;
+    }
+    .totals-table th, .totals-table td{
+      padding:12px 12px;
+      text-align:left;
+      border-bottom:1px solid rgba(0,0,0,.08);
+    }
+    .totals-table tr:last-child td{border-bottom:none}
+    .muted{color:var(--muted)}
+    .rules p{margin-top:10px; line-height:1.45}
+    .bottom-nav{
+      position:fixed;
+      left:0; right:0; bottom:0;
+      padding:10px 14px calc(12px + var(--safe-bottom));
+      background:linear-gradient(180deg, rgba(18,55,16,0) 0%, rgba(18,55,16,.96) 24%, rgba(18,55,16,.98) 100%);
+      backdrop-filter: blur(16px);
+    }
+    .nav-shell{
+      max-width:720px;
+      margin:0 auto;
+      background:rgba(255,255,255,.1);
+      border:1px solid var(--line);
+      border-radius:22px;
+      padding:8px;
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:8px;
+      box-shadow:var(--shadow);
+    }
+    .nav-shell button{
+      min-height:54px;
+      border-radius:16px;
+      background:transparent;
+      color:var(--text);
+      font-size:.82rem;
+      line-height:1.1;
+      font-weight:700;
+    }
+    .nav-shell button.active{
+      background:rgba(255,255,255,.18);
+    }
+    .small{font-size:.85rem}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <section id="screen-home" class="screen active">
+      <div class="hero">
+        <img src="assets/page1.png" alt="McNabb Cotton Club cover" />
+        <div class="hero-overlay">
+          <h1>McNabb Cotton Club</h1>
+          <p class="sub">iPhone-ready scorecard app for your home course</p>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="card">
+          <h2>Players</h2>
+          <p class="sub">Enter up to 4 names. Scores save automatically on this device.</p>
+          <div class="players-grid">
+            <div><label for="player1">Player 1</label><input id="player1" type="text" maxlength="24" placeholder="Player 1" /></div>
+            <div><label for="player2">Player 2</label><input id="player2" type="text" maxlength="24" placeholder="Player 2" /></div>
+            <div><label for="player3">Player 3</label><input id="player3" type="text" maxlength="24" placeholder="Player 3" /></div>
+            <div><label for="player4">Player 4</label><input id="player4" type="text" maxlength="24" placeholder="Player 4" /></div>
+          </div>
+          <div class="button-row">
+            <button class="primary" id="startRound">Start Round</button>
+            <button class="secondary" id="clearRound">New Round</button>
+          </div>
+        </div>
+
+        <div class="card rules">
+          <h2>About & Rules</h2>
+          <p>McNabb Cotton Club is a unique course at McNabb Farms in Ropesville, Texas, blending the farm’s cotton heritage with Scottish golf roots. The PDF describes it as an open-heathland layout opened in June 2022. fileciteturn0file0</p>
+          <p>Please respect the game, the course, and the farm. Repair divots, do not hit toward houses, and treat cotton-field and west-road misses as drop areas as described in the original scorecard. fileciteturn0file0</p>
+          <p>BirdieBall is used here, with shorter-than-normal flight distances, so club selection matters more than swing changes. fileciteturn0file0</p>
+        </div>
+
+        <div class="card">
+          <h2>Course</h2>
+          <p class="sub">9 holes • Par 36</p>
+          <div class="button-row">
+            <button class="secondary quick-hole" data-hole="1">Hole 1</button>
+            <button class="secondary quick-hole" data-hole="2">Hole 2</button>
+            <button class="secondary quick-hole" data-hole="3">Hole 3</button>
+            <button class="secondary quick-hole" data-hole="4">Hole 4</button>
+            <button class="secondary quick-hole" data-hole="5">Hole 5</button>
+            <button class="secondary quick-hole" data-hole="6">Hole 6</button>
+            <button class="secondary quick-hole" data-hole="7">Hole 7</button>
+            <button class="secondary quick-hole" data-hole="8">Hole 8</button>
+            <button class="secondary quick-hole" data-hole="9">Hole 9</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="screen-hole" class="screen">
+      <div class="card hole-card">
+        <div class="hole-top">
+          <img id="holeImage" src="" alt="Hole layout" />
+          <div class="hole-meta">
+            <div>
+              <h2 id="holeTitle">Hole 1</h2>
+              <p class="sub" id="holeSubtitle">Par 4 • 362 ft</p>
+            </div>
+            <div class="pill" id="holeProgress">1 / 9</div>
+          </div>
+        </div>
+        <div class="hole-body">
+          <div id="scoreInputs"></div>
+          <div class="button-row">
+            <button class="secondary" id="prevHole">Previous</button>
+            <button class="primary" id="nextHole">Next</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="screen-totals" class="screen">
+      <div class="card">
+        <h2>Round Totals</h2>
+        <p class="sub">Front 9 total against par 36</p>
+        <table class="totals-table" id="totalsTable">
+          <thead>
+            <tr><th>Player</th><th>Total</th><th>To Par</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <div class="button-row">
+          <button class="secondary" id="goToHole1">Go to Hole 1</button>
+          <button class="primary" id="shareSummary">Copy Summary</button>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Hole by Hole</h2>
+        <div id="perHoleBreakdown" class="small muted"></div>
+      </div>
+    </section>
+
+    <section id="screen-info" class="screen">
+      <div class="card">
+        <h2>Original Scorecard</h2>
+        <p class="sub">This app was rebuilt from your iOS-formatted McNabb Cotton Club scorecard PDF. It preserves the course structure, hole numbers, pars, distances, player slots, and final totals page from the uploaded file. fileciteturn0file0</p>
+        <div class="button-row">
+          <a class="secondary" style="display:inline-flex;align-items:center;justify-content:center;text-decoration:none;" href="../McNabbCottonClubScorecard-v2.pdf" target="_blank" rel="noopener">Open PDF</a>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="bottom-nav">
+    <div class="nav-shell">
+      <button class="nav-btn active" data-screen="home">Home</button>
+      <button class="nav-btn" data-screen="hole">Score</button>
+      <button class="nav-btn" data-screen="totals">Totals</button>
+      <button class="nav-btn" data-screen="info">Info</button>
+    </div>
+  </div>
+
+<script>
+const course = [
+  {hole:1, par:4, distance:362, image:'assets/page3.png'},
+  {hole:2, par:4, distance:375, image:'assets/page4.png'},
+  {hole:3, par:3, distance:266, image:'assets/page5.png'},
+  {hole:4, par:4, distance:365, image:'assets/page6.png'},
+  {hole:5, par:5, distance:471, image:'assets/page7.png'},
+  {hole:6, par:4, distance:332, image:'assets/page8.png'},
+  {hole:7, par:3, distance:207, image:'assets/page9.png'},
+  {hole:8, par:5, distance:470, image:'assets/page10.png'},
+  {hole:9, par:4, distance:360, image:'assets/page11.png'}
+];
+const PAR = 36;
+const storageKey = 'mcnabb-cotton-club-state-v1';
+let state = loadState();
+let currentHole = state.currentHole || 1;
+
+function blankState(){
+  return {
+    players:['','','',''],
+    scores:Array.from({length:9},()=>['','','','']),
+    currentHole:1
+  };
+}
+function loadState(){
+  try{
+    const raw = localStorage.getItem(storageKey);
+    if(!raw) return blankState();
+    return {...blankState(), ...JSON.parse(raw)};
+  }catch(e){
+    return blankState();
+  }
+}
+function saveState(){
+  state.currentHole = currentHole;
+  localStorage.setItem(storageKey, JSON.stringify(state));
+}
+function activePlayers(){
+  const players = state.players.map((name, idx)=> name.trim() || `Player ${idx+1}`);
+  return players;
+}
+function showScreen(name){
+  document.querySelectorAll('.screen').forEach(el=>el.classList.remove('active'));
+  document.getElementById(`screen-${name}`).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(btn=>btn.classList.toggle('active', btn.dataset.screen===name));
+  if(name === 'hole') renderHole();
+  if(name === 'totals') renderTotals();
+}
+function syncPlayerInputs(){
+  for(let i=1;i<=4;i++){
+    document.getElementById(`player${i}`).value = state.players[i-1] || '';
+  }
+}
+function bindPlayerInputs(){
+  for(let i=1;i<=4;i++){
+    document.getElementById(`player${i}`).addEventListener('input', e=>{
+      state.players[i-1] = e.target.value;
+      saveState();
+      renderHole();
+      renderTotals();
+    });
+  }
+}
+function renderHole(){
+  const hole = course[currentHole-1];
+  document.getElementById('holeImage').src = hole.image;
+  document.getElementById('holeTitle').textContent = `Hole ${hole.hole}`;
+  document.getElementById('holeSubtitle').textContent = `Par ${hole.par} • ${hole.distance} ft`;
+  document.getElementById('holeProgress').textContent = `${hole.hole} / 9`;
+  document.getElementById('prevHole').disabled = currentHole === 1;
+  document.getElementById('nextHole').textContent = currentHole === 9 ? 'Finish' : 'Next';
+
+  const wrap = document.getElementById('scoreInputs');
+  wrap.innerHTML = '';
+  activePlayers().forEach((name, idx)=>{
+    const row = document.createElement('div');
+    row.className = 'score-row';
+    row.innerHTML = `
+      <div class="player-chip">${escapeHtml(name)}</div>
+      <input type="number" inputmode="numeric" min="1" max="20" placeholder="-" value="${state.scores[currentHole-1][idx] ?? ''}" />
+    `;
+    const input = row.querySelector('input');
+    input.addEventListener('input', e=>{
+      state.scores[currentHole-1][idx] = e.target.value.replace(/[^0-9]/g,'').slice(0,2);
+      saveState();
+    });
+    wrap.appendChild(row);
+  });
+}
+function renderTotals(){
+  const tbody = document.querySelector('#totalsTable tbody');
+  tbody.innerHTML = '';
+  const names = activePlayers();
+  names.forEach((name, idx)=>{
+    const total = state.scores.reduce((sum, holeScores)=> sum + (parseInt(holeScores[idx],10) || 0), 0);
+    const toPar = total ? (total - PAR) : '';
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${escapeHtml(name)}</td><td>${total || ''}</td><td>${toPar === '' ? '' : (toPar > 0 ? '+' + toPar : toPar)}</td>`;
+    tbody.appendChild(tr);
+  });
+
+  const breakdown = document.getElementById('perHoleBreakdown');
+  breakdown.innerHTML = course.map((hole, hIdx)=>{
+    const scores = activePlayers().map((name, pIdx)=>{
+      const v = state.scores[hIdx][pIdx] || '–';
+      return `${escapeHtml(name)}: ${v}`;
+    }).join(' · ');
+    return `<p><strong>Hole ${hole.hole}</strong> (Par ${hole.par}, ${hole.distance} ft): ${scores}</p>`;
+  }).join('');
+}
+function escapeHtml(str){
+  return String(str).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;', "'":'&#39;'}[s]));
+}
+document.querySelectorAll('.nav-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>showScreen(btn.dataset.screen));
+});
+document.querySelectorAll('.quick-hole').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    currentHole = Number(btn.dataset.hole);
+    saveState();
+    showScreen('hole');
+  });
+});
+document.getElementById('startRound').addEventListener('click', ()=>{
+  currentHole = 1;
+  saveState();
+  showScreen('hole');
+});
+document.getElementById('clearRound').addEventListener('click', ()=>{
+  if(confirm('Clear this round and reset all names and scores?')){
+    state = blankState();
+    currentHole = 1;
+    saveState();
+    syncPlayerInputs();
+    renderHole();
+    renderTotals();
+    showScreen('home');
+  }
+});
+document.getElementById('prevHole').addEventListener('click', ()=>{
+  if(currentHole > 1){ currentHole--; saveState(); renderHole(); }
+});
+document.getElementById('nextHole').addEventListener('click', ()=>{
+  if(currentHole < 9){ currentHole++; saveState(); renderHole(); }
+  else { showScreen('totals'); }
+});
+document.getElementById('goToHole1').addEventListener('click', ()=>{
+  currentHole = 1;
+  saveState();
+  showScreen('hole');
+});
+document.getElementById('shareSummary').addEventListener('click', async ()=>{
+  const names = activePlayers();
+  const lines = names.map((name, idx)=>{
+    const total = state.scores.reduce((sum, holeScores)=> sum + (parseInt(holeScores[idx],10) || 0), 0);
+    const toPar = total ? total - PAR : 0;
+    return `${name}: ${total || 0} (${toPar > 0 ? '+'+toPar : toPar})`;
+  });
+  const summary = `McNabb Cotton Club\nPar 36\n` + lines.join('\n');
+  try{
+    await navigator.clipboard.writeText(summary);
+    alert('Round summary copied.');
+  }catch(e){
+    alert(summary);
+  }
+});
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=> navigator.serviceWorker.register('./service-worker.js'));
+}
+syncPlayerInputs();
+bindPlayerInputs();
+renderHole();
+renderTotals();
+</script>
+</body>
+</html>
